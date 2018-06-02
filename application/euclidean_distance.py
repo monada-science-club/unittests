@@ -1,19 +1,19 @@
-def euclidean_distance(point_A, point_B):
+def euclidean_distance(point_a, point_b):
     """
     Arguments:
-        point_A (two-element list or tuple): the x, y coordinates of points A
-        point_B (two-element list or tuple): the x, y coordinates of points B
+        point_a (two-element list or tuple): the x, y coordinates of points a
+        point_b (two-element list or tuple): the x, y coordinates of points b
 
     Returns:
-         distance between the points A and B (float or int)
+         distance between the points a and b (float or int)
     """
 
-    Ax = point_A[0]
-    Ay = point_A[1]
+    a_x = point_a[0]
+    a_y = point_a[1]
 
-    Bx = point_B[0]
-    By = point_B[1]
+    b_x = point_b[0]
+    b_y = point_b[1]
 
-    distance_between_the_points_A_and_B = ((Bx - Ax) ** 2 + (By - Ay) ** 2) ** 0.5
+    distance = ((b_x - a_x) ** 2 + (b_y - a_y) ** 2) ** 0.5
 
-    return distance_between_the_points_A_and_B
+    return distance
