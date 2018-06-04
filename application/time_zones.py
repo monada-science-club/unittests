@@ -1,10 +1,10 @@
 from datetime import datetime
 from math import fabs
 
-from pytz import all_timezones as list_of_all_time_zones_in_python
-from pytz import timezone as get_info_on_time_zone
+from pytz import all_timezones as time_zone_list
+from pytz import timezone as get_time_zone_info
 
-class time_zones_class:
+class TimeZonesClass:
 
     def __init__(self, time_zone='UTC'):
 
@@ -14,24 +14,26 @@ class time_zones_class:
             time_zone (str, default='UTC'): name of the specified time zone in python
         Raises:
             ValueError: if time_zone is not a valid time zone format in python
-            (time_zone is not in list_of_all_time_zones_in_python)
+            (time_zone is not in time_zone_list)
         """
 
-        if time_zone not in list_of_all_time_zones_in_python:
-            raise ValueError('%s nie jest poprawnym formatem strefy czasowej w Pythonie' % (time_zone))
+        if time_zone not in time_zone_list:
+            raise ValueError('%s is not a valid time zone format in Python' % (time_zone))
+
         self._time_zone = time_zone
 
-    def get_date_and_time_in_instance_time_zone(self):
+    def instance_time_zone_date(self):
+
         """
             Returns:
                 The current time and date in the instance's time zone
         """
-        instance_time_zone_info = get_info_on_time_zone(self._time_zone)
-        instance_time_zone_date = datetime.now(instance_time_zone_info).strftime('%H:%M %d-%m-%Y')
-        return instance_time_zone_date
+        time_zone_info = get_time_zone_info(self._time_zone)
+        time_zone_date = datetime.now(time_zone_info).strftime('%H:%M %d-%m-%Y')
+        return time_zone_date
 
     @staticmethod
-    def get_date_and_time_in_different_time_zone(another_time_zone):
+    def another_time_zone_date(another_time_zone):
 
         """
             Arguments:
@@ -40,17 +42,17 @@ class time_zones_class:
                 the current time and date in the 'another_time_zone'
             Raises:
                 ValueError: if another_time_zone is not a valid time zone format in python
-                (another_time_zone is not in list_of_all_time_zones_in_python)
+                (another_time_zone is not in time_zone_list)
         """
 
-        if another_time_zone not in list_of_all_time_zones_in_python:
-            raise ValueError('%s nie jest poprawnym formatem strefy czasowej w Pythonie' % (another_time_zone))
+        if another_time_zone not in time_zone_list:
+            raise ValueError('%s is not a valid time zone format in Python' % (another_time_zone))
 
-        another_time_zone_info = get_info_on_time_zone(another_time_zone)
-        another_time_zone_date = datetime.now(another_time_zone_info).strftime('%H:%M %d-%m-%Y')
-        return another_time_zone_date
+        time_zone_info = get_time_zone_info(another_time_zone)
+        time_zone_date = datetime.now(time_zone_info).strftime('%H:%M %d-%m-%Y')
+        return time_zone_date
 
-    def time_difference_between_two_time_zones(self, first_time_zone, second_time_zone=None):
+    def time_zones_difference(self, first_time_zone, second_time_zone=None):
         """
             Arguments:
                 first_time_zone (str): name of the specified time zone in python
@@ -58,9 +60,9 @@ class time_zones_class:
 
             Raises:
                 1. ValueError: if first_time_zone is not a valid time zone format in python
-                (first_time_zone is not in list_of_all_time_zones_in_python)
+                (first_time_zone is not in time_zone_list)
                 2. ValueError: if second_time_zone is not a valid time zone format in python
-                (second_time_zone is not in list_of_all_time_zones_in_python)
+                (second_time_zone is not in time_zone_list)
 
             Returns:
                 If 'second_time_zone' is provided:
@@ -70,27 +72,27 @@ class time_zones_class:
                     time difference between the two time zones 'first_time_zone' and the instance's time zone
         """
 
-        if first_time_zone not in list_of_all_time_zones_in_python:
-            raise ValueError('%s nie jest poprawnym formatem strefy czasowej w Pythonie' % (first_time_zone))
+        if first_time_zone not in time_zone_list:
+            raise ValueError('%s is not a valid time zone format in Python' % (first_time_zone))
 
         # if 'second_time_zone' is not provided, assign the instance's time zone to it
         if second_time_zone is None:
             second_time_zone = self._time_zone
 
-        elif second_time_zone not in list_of_all_time_zones_in_python:
-            raise ValueError('%s nie jest poprawnym formatem strefy czasowej w Pythonie' % (second_time_zone))
+        elif second_time_zone not in time_zone_list:
+            raise ValueError('%s is not a valid time zone format in Python' % (second_time_zone))
 
         # get the current UTC date and time
         current_UTC_time = datetime.utcnow()
 
         # get information on particular time zone then determine its hourly offset from UTC time
-        first_time_zone_offset_from_UTC_time = get_info_on_time_zone(first_time_zone).utcoffset(
+        first_time_zone_offset = get_time_zone_info(first_time_zone).utcoffset(
             current_UTC_time).total_seconds() / 3600
-        second_time_zone_offset_from_UTC_time = get_info_on_time_zone(second_time_zone).utcoffset(
+
+        second_time_zone_offset = get_time_zone_info(second_time_zone).utcoffset(
             current_UTC_time).total_seconds() / 3600
 
         # determine the hourly difference between 'first_time_zone' and 'second_time_zone'
-        time_difference_between_the_two_time_zones = fabs(
-            first_time_zone_offset_from_UTC_time - second_time_zone_offset_from_UTC_time)
+        time_difference = fabs(first_time_zone_offset - second_time_zone_offset)
 
-        return time_difference_between_the_two_time_zones
+        return time_difference

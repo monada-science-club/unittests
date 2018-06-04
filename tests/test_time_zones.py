@@ -5,168 +5,179 @@ from pytest import raises
 from application import time_zones as TIME_ZONE
 
 
-def test_init_time_zones_class():
+def test_init_TimeZonesClass():
 
-    first_example_of_time_zone = 'UTC'
-    first_example_instance_of_TIME_ZONE_time_zones_class = TIME_ZONE.time_zones_class()
-    assert first_example_instance_of_TIME_ZONE_time_zones_class._time_zone == first_example_of_time_zone
+    first_time_zone = 'UTC'
+    first_instance = TIME_ZONE.TimeZonesClass()
+    assert first_instance._time_zone == first_time_zone
 
-    second_example_of_time_zone = 'Europe/Warsaw'
-    second_example_instance_of_TIME_ZONE_time_zones_class = TIME_ZONE.time_zones_class(second_example_of_time_zone)
-    assert second_example_instance_of_TIME_ZONE_time_zones_class._time_zone == second_example_of_time_zone
+    second_time_zone = 'Europe/Warsaw'
+    second_instance = TIME_ZONE.TimeZonesClass(second_time_zone)
+    assert second_instance._time_zone == second_time_zone
 
-    third_example_of_time_zone = 'XYZ'
-    expected_ValueError_message = '%s nie jest poprawnym formatem strefy czasowej w Pythonie' % (
-        third_example_of_time_zone)
+    third_time_zone = 'XYZ'
+    expected_ValueError_message = '%s is not a valid time zone format in Python' % (third_time_zone)
     with raises(ValueError, match=expected_ValueError_message):
-        third_example_instance_of_TIME_ZONE_time_zones_class = TIME_ZONE.time_zones_class(third_example_of_time_zone)
+        third_time_zone = TIME_ZONE.TimeZonesClass(third_time_zone)
 
 
-def test_get_date_and_time_in_instance_time_zone():
+@patch.object(TIME_ZONE, "datetime")
+@patch.object(TIME_ZONE, "get_time_zone_info")
+@patch.object(TIME_ZONE.TimeZonesClass, "__init__")
+def test_instance_time_zone_date(class_init, get_time_zone_info, datetime):
 
-    TIME_ZONE.time_zones_class.__init__ = MagicMock(return_value=None)
-    TIME_ZONE.time_zones_class._time_zone = 1
+    class_init.return_value = None
+    get_time_zone_info.return_value = 1
 
-    TIME_ZONE.get_info_on_time_zone = MagicMock(return_value=2)
+    result_datetime_now = MagicMock()
+    datetime.now = MagicMock(return_value=result_datetime_now)
+    result_datetime_now.strftime = MagicMock(return_value=2)
 
-    TIME_ZONE.datetime = MagicMock()
-    result_of_the_call_TIME_ZONE_datetime_now_method = MagicMock()
-    TIME_ZONE.datetime.now = MagicMock(return_value=result_of_the_call_TIME_ZONE_datetime_now_method)
-    result_of_the_call_TIME_ZONE_datetime_now_method.strftime = MagicMock(return_value=3)
+    example_instance = TIME_ZONE.TimeZonesClass()
+    example_instance._time_zone = 3
 
-    example_instance_of_TIME_ZONE_time_zones_class = TIME_ZONE.time_zones_class()
-    expected_result_of_the_get_date_and_time_in_instance_time_zone_function_call = 3
-    received_result = example_instance_of_TIME_ZONE_time_zones_class.get_date_and_time_in_instance_time_zone()
-    assert expected_result_of_the_get_date_and_time_in_instance_time_zone_function_call == received_result
+    expected_result = 2
+    received_result = example_instance.instance_time_zone_date()
+    assert expected_result == received_result
 
-    TIME_ZONE.time_zones_class.__init__.assert_called_once_with()
-    TIME_ZONE.get_info_on_time_zone.assert_called_once_with(1)
-    TIME_ZONE.datetime.now.assert_called_once_with(2)
-    result_of_the_call_TIME_ZONE_datetime_now_method.strftime.assert_called_once_with('%H:%M %d-%m-%Y')
+    class_init.assert_called_once_with()
+
+    get_time_zone_info.assert_called_once_with(3)
+
+    datetime.now.assert_called_once_with(1)
+
+    result_datetime_now.strftime.assert_called_once_with('%H:%M %d-%m-%Y')
 
 
-@patch.object(TIME_ZONE, 'list_of_all_time_zones_in_python', [1, 2])
-def test_get_date_and_time_in_different_time_zone():
+@patch.object(TIME_ZONE, 'time_zone_list', [1, 2, 3])
+@patch.object(TIME_ZONE, "datetime")
+@patch.object(TIME_ZONE, "get_time_zone_info")
+def test_another_time_zone_date(get_time_zone_info, datetime):
 
-    first_example_of_time_zone = 1
-    TIME_ZONE.get_info_on_time_zone = MagicMock(return_value=3)
+    get_time_zone_info.return_value = 1
 
-    TIME_ZONE.datetime = MagicMock()
-    result_of_the_call_TIME_ZONE_datetime_now_method = MagicMock()
-    TIME_ZONE.datetime.now = MagicMock(return_value=result_of_the_call_TIME_ZONE_datetime_now_method)
-    result_of_the_call_TIME_ZONE_datetime_now_method.strftime = MagicMock(return_value=4)
+    result_datetime_now = MagicMock()
+    datetime.now = MagicMock(return_value=result_datetime_now)
+    result_datetime_now.strftime = MagicMock(return_value=2)
 
-    expected_result_of_the_get_date_and_time_in_different_time_zone_function_call = 4
-    received_result = TIME_ZONE.time_zones_class.get_date_and_time_in_different_time_zone(first_example_of_time_zone)
-    assert expected_result_of_the_get_date_and_time_in_different_time_zone_function_call == received_result
+    first_time_zone = 3
 
-    TIME_ZONE.get_info_on_time_zone.assert_called_once_with(1)
-    TIME_ZONE.datetime.now.assert_called_once_with(3)
-    result_of_the_call_TIME_ZONE_datetime_now_method.strftime.assert_called_once_with('%H:%M %d-%m-%Y')
+    expected_result = 2
+    received_result = TIME_ZONE.TimeZonesClass.another_time_zone_date(first_time_zone)
+    assert expected_result == received_result
 
-    second_example_of_time_zone = 5
-    expected_ValueError_message = '%s nie jest poprawnym formatem strefy czasowej w Pythonie' % (
-        second_example_of_time_zone)
+    get_time_zone_info.assert_called_once_with(3)
+
+    datetime.now.assert_called_once_with(1)
+
+    result_datetime_now.strftime.assert_called_once_with('%H:%M %d-%m-%Y')
+
+    second_time_zone = 4
+    expected_ValueError_message = '%s is not a valid time zone format in Python' % (second_time_zone)
     with raises(ValueError, match=expected_ValueError_message):
-        TIME_ZONE.time_zones_class.get_date_and_time_in_different_time_zone(second_example_of_time_zone)
+        TIME_ZONE.TimeZonesClass.another_time_zone_date(second_time_zone)
 
 
-@patch.object(TIME_ZONE, 'list_of_all_time_zones_in_python', [1, 2])
-def test_time_difference_between_two_time_zones_two_different_time_zones():
+@patch.object(TIME_ZONE, 'time_zone_list', [3, 4])
+@patch.object(TIME_ZONE, "datetime")
+@patch.object(TIME_ZONE, "get_time_zone_info")
+@patch.object(TIME_ZONE.TimeZonesClass, "__init__")
+def test_time_zones_difference(class_init, get_time_zone_info, datetime):
 
-    TIME_ZONE.time_zones_class.__init__ = MagicMock(return_value=None)
+    class_init.return_value = None
 
-    TIME_ZONE.datetime = MagicMock()
-    TIME_ZONE.datetime.utcnow = MagicMock(return_value=3)
-    result_of_the_call_TIME_ZONE_get_info_on_time_zone_method = MagicMock()
-    TIME_ZONE.get_info_on_time_zone = MagicMock(return_value=result_of_the_call_TIME_ZONE_get_info_on_time_zone_method)
-    result_of_the_call_TIME_ZONE_utcoffset_method = MagicMock()
-    result_of_the_call_TIME_ZONE_get_info_on_time_zone_method.utcoffset = MagicMock(
-        return_value=result_of_the_call_TIME_ZONE_utcoffset_method)
-    result_of_the_call_TIME_ZONE_utcoffset_method.total_seconds = MagicMock(return_value=4)
+    datetime.utcnow = MagicMock(return_value=1)
 
-    first_example_of_time_zone = 1
-    second_example_of_time_zone = 2
-    example_instance_of_TIME_ZONE_time_zones_class = TIME_ZONE.time_zones_class()
+    result_get_time_zone_info = MagicMock()
+    get_time_zone_info.return_value = result_get_time_zone_info
 
-    expected_result_of_the_time_difference_between_two_time_zones_function_call = 0
-    received_result = example_instance_of_TIME_ZONE_time_zones_class.time_difference_between_two_time_zones(
-        first_example_of_time_zone, second_example_of_time_zone)
-    assert expected_result_of_the_time_difference_between_two_time_zones_function_call == received_result
+    result_utcoffset = MagicMock()
+    result_get_time_zone_info.utcoffset = MagicMock(return_value=result_utcoffset)
 
-    TIME_ZONE.time_zones_class.__init__.assert_called_once_with()
+    result_utcoffset.total_seconds = MagicMock(return_value=2)
 
-    assert TIME_ZONE.datetime.utcnow.call_count == 1
+    first_time_zone = 3
+    second_time_zone = 4
+    example_instance = TIME_ZONE.TimeZonesClass()
 
-    assert TIME_ZONE.get_info_on_time_zone.call_count == 2
-    all_the_expected_calls_made_to_TIME_ZONE_get_info_on_time_zone_method = [call(1), call(2)]
-    assert TIME_ZONE.get_info_on_time_zone.call_args_list == all_the_expected_calls_made_to_TIME_ZONE_get_info_on_time_zone_method
+    expected_result = 0
+    received_result = example_instance.time_zones_difference(first_time_zone, second_time_zone)
+    assert expected_result == received_result
 
-    result_of_the_call_TIME_ZONE_get_info_on_time_zone_method.utcoffset.call_count == 2
-    all_the_expected_calls_made_to_TIME_ZONE_utcoffset = [call(3), call(3)]
-    assert result_of_the_call_TIME_ZONE_get_info_on_time_zone_method.utcoffset.call_args_list == all_the_expected_calls_made_to_TIME_ZONE_utcoffset
+    class_init.assert_called_once_with()
 
-    assert result_of_the_call_TIME_ZONE_utcoffset_method.total_seconds.call_count == 2
+    assert datetime.utcnow.call_count == 1
+    assert get_time_zone_info.call_count == 2
 
+    expected_calls = [call(3), call(4)]
+    assert get_time_zone_info.call_args_list == expected_calls
 
-@patch.object(TIME_ZONE, 'list_of_all_time_zones_in_python', [1, 2])
-def test_time_difference_between_two_time_zones_only_one_time_zone():
+    result_get_time_zone_info.utcoffset.call_count == 2
+    expected_calls = [call(1), call(1)]
+    assert result_get_time_zone_info.utcoffset.call_args_list == expected_calls
 
-    TIME_ZONE.time_zones_class.__init__ = MagicMock(return_value=None)
-
-    TIME_ZONE.datetime = MagicMock()
-    TIME_ZONE.datetime.utcnow = MagicMock(return_value=3)
-    result_of_the_call_TIME_ZONE_get_info_on_time_zone_method = MagicMock()
-    TIME_ZONE.get_info_on_time_zone = MagicMock(return_value=result_of_the_call_TIME_ZONE_get_info_on_time_zone_method)
-    result_of_the_call_TIME_ZONE_utcoffset_method = MagicMock()
-    result_of_the_call_TIME_ZONE_get_info_on_time_zone_method.utcoffset = MagicMock(
-        return_value=result_of_the_call_TIME_ZONE_utcoffset_method)
-    result_of_the_call_TIME_ZONE_utcoffset_method.total_seconds = MagicMock(return_value=4)
-
-    TIME_ZONE.time_zones_class._time_zone = 1
-    example_of_time_zone = 2
-    example_instance_of_TIME_ZONE_time_zones_class = TIME_ZONE.time_zones_class()
-
-    expected_result_of_the_time_difference_between_two_time_zones_function_call = 0
-    received_result = example_instance_of_TIME_ZONE_time_zones_class.time_difference_between_two_time_zones(
-        example_of_time_zone)
-    assert expected_result_of_the_time_difference_between_two_time_zones_function_call == received_result
-
-    TIME_ZONE.time_zones_class.__init__.assert_called_once_with()
-
-    assert TIME_ZONE.datetime.utcnow.call_count == 1
-
-    assert TIME_ZONE.get_info_on_time_zone.call_count == 2
-    all_the_expected_calls_made_to_TIME_ZONE_get_info_on_time_zone_method = [call(2), call(1)]
-    assert TIME_ZONE.get_info_on_time_zone.call_args_list == all_the_expected_calls_made_to_TIME_ZONE_get_info_on_time_zone_method
-
-    result_of_the_call_TIME_ZONE_get_info_on_time_zone_method.utcoffset.call_count == 2
-    all_the_expected_calls_made_to_TIME_ZONE_utcoffset = [call(3), call(3)]
-    assert result_of_the_call_TIME_ZONE_get_info_on_time_zone_method.utcoffset.call_args_list == all_the_expected_calls_made_to_TIME_ZONE_utcoffset
-
-    assert result_of_the_call_TIME_ZONE_utcoffset_method.total_seconds.call_count == 2
+    assert result_utcoffset.total_seconds.call_count == 2
 
 
-@patch.object(TIME_ZONE, 'list_of_all_time_zones_in_python', [1, 2])
-def test_time_difference_between_two_time_zones_raises():
+@patch.object(TIME_ZONE, 'time_zone_list', [2, 3])
+@patch.object(TIME_ZONE, "datetime")
+@patch.object(TIME_ZONE, "get_time_zone_info")
+@patch.object(TIME_ZONE.TimeZonesClass, "__init__")
+def test_time_zones_difference_one_time_zone(class_init, get_time_zone_info, datetime):
 
-    TIME_ZONE.time_zones_class.__init__ = MagicMock(return_value=None)
+    class_init.return_value = None
 
-    first_example_of_time_zone = 3
-    second_example_of_time_zone = 1
-    example_instance_of_TIME_ZONE_time_zones_class = TIME_ZONE.time_zones_class()
+    datetime.utcnow = MagicMock(return_value=1)
 
-    first_expected_ValueError_message = '%s nie jest poprawnym formatem strefy czasowej w Pythonie' % (
-        first_example_of_time_zone)
+    result_get_time_zone_info = MagicMock()
+    get_time_zone_info.return_value = result_get_time_zone_info
+
+    result_utcoffset = MagicMock()
+    result_get_time_zone_info.utcoffset = MagicMock(return_value=result_utcoffset)
+
+    result_utcoffset.total_seconds = MagicMock(return_value=2)
+
+    example_instance = TIME_ZONE.TimeZonesClass()
+    example_instance._time_zone = 2
+
+    example_time_zone = 3
+    expected_result = 0
+    received_result = example_instance.time_zones_difference(example_time_zone)
+    assert expected_result == received_result
+
+    class_init.assert_called_once_with()
+
+    assert datetime.utcnow.call_count == 1
+
+    assert get_time_zone_info.call_count == 2
+
+    expected_calls = [call(3), call(2)]
+    assert get_time_zone_info.call_args_list == expected_calls
+
+    result_get_time_zone_info.utcoffset.call_count == 2
+    expected_calls = [call(1), call(1)]
+    assert result_get_time_zone_info.utcoffset.call_args_list == expected_calls
+
+    assert result_utcoffset.total_seconds.call_count == 2
+
+
+@patch.object(TIME_ZONE, 'time_zone_list', [1, 2])
+@patch.object(TIME_ZONE.TimeZonesClass, "__init__")
+def test_time_zones_difference_raises(class_init):
+
+    class_init.return_value = None
+
+    first_time_zone = 3
+    second_time_zone = 1
+    example_instance = TIME_ZONE.TimeZonesClass()
+
+    first_expected_ValueError_message = '%s is not a valid time zone format in Python' % (first_time_zone)
     with raises(ValueError, match=first_expected_ValueError_message):
-        example_instance_of_TIME_ZONE_time_zones_class.time_difference_between_two_time_zones(
-            first_example_of_time_zone, second_example_of_time_zone)
+        example_instance.time_zones_difference(first_time_zone, second_time_zone)
 
-    third_example_of_time_zone = 1
-    fourth_example_of_time_zone = 5
+    third_time_zone = 1
+    fourth_time_zone = 4
 
-    second_expected_ValueError_message = '%s nie jest poprawnym formatem strefy czasowej w Pythonie' % (
-        fourth_example_of_time_zone)
+    second_expected_ValueError_message = '%s is not a valid time zone format in Python' % (fourth_time_zone)
     with raises(ValueError, match=second_expected_ValueError_message):
-        example_instance_of_TIME_ZONE_time_zones_class.time_difference_between_two_time_zones(
-            third_example_of_time_zone, fourth_example_of_time_zone)
+        example_instance.time_zones_difference(third_time_zone, fourth_time_zone)
